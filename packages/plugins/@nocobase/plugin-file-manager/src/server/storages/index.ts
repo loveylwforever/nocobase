@@ -91,16 +91,7 @@ export abstract class StorageType {
   }
 
   async getFileStream(file: AttachmentModel): Promise<{ stream: Readable; contentType?: string }> {
-    if (file.url.startsWith('/')) {
-      const filePath = Path.join(process.cwd(), 'storage/uploads', file.path || '', file.filename);
-      if (await fse.exists(filePath)) {
-        return {
-          stream: fs.createReadStream(filePath),
-          contentType: file.mimetype,
-        };
-      }
-    }
-    if (file.url.startsWith('http')) {
+    try {
       const fileURL = await this.getFileURL(file);
       const requestOptions: AxiosRequestConfig = {
         responseType: 'stream',
@@ -114,9 +105,9 @@ export abstract class StorageType {
         stream: response.data,
         contentType: response.headers['content-type'],
       };
+    } catch (err) {
+      throw new Error(`fetch file failed: ${err}`);
     }
-
-    throw new Error(`Unsupported URL format: ${file.url}`);
   }
 }
 

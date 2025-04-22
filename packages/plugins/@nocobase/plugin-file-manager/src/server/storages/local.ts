@@ -8,10 +8,13 @@
  */
 
 import { isURL } from '@nocobase/utils';
+import fsSync from 'fs';
+import fse from 'fs-extra';
 import fs from 'fs/promises';
 import mkdirp from 'mkdirp';
 import multer from 'multer';
 import path from 'path';
+import type { Readable } from 'stream';
 import urlJoin from 'url-join';
 import { AttachmentModel, StorageType } from '.';
 import { FILE_SIZE_LIMIT_DEFAULT, STORAGE_TYPE_LOCAL } from '../../constants';
@@ -82,5 +85,16 @@ export default class extends StorageType {
       return url;
     }
     return urlJoin(process.env.APP_PUBLIC_PATH, url);
+  }
+
+  async getFileStream(file: AttachmentModel): Promise<{ stream: Readable; contentType?: string }> {
+    const filePath = path.join(process.cwd(), 'storage/uploads', file.path || '', file.filename);
+    if (await fse.exists(filePath)) {
+      return {
+        stream: fsSync.createReadStream(filePath),
+        contentType: file.mimetype,
+      };
+    }
+    throw new Error(`File not found: ${filePath}`);
   }
 }
