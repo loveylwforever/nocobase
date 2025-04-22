@@ -345,6 +345,9 @@ export class PluginFileManagerServer extends Plugin {
     }
 
     const StorageType = this.storageTypes.get(storage.type);
+    if (!StorageType) {
+      throw new Error(`[file-manager] storage type "${storage.type}" is not defined`);
+    }
     const storageInstance = new StorageType(storage);
 
     if (!storageInstance) {

@@ -9,7 +9,6 @@
 
 import { isURL } from '@nocobase/utils';
 import fsSync from 'fs';
-import fse from 'fs-extra';
 import fs from 'fs/promises';
 import mkdirp from 'mkdirp';
 import multer from 'multer';
@@ -88,8 +87,8 @@ export default class extends StorageType {
   }
 
   async getFileStream(file: AttachmentModel): Promise<{ stream: Readable; contentType?: string }> {
-    const filePath = path.join(process.cwd(), 'storage/uploads', file.path || '', file.filename);
-    if (await fse.exists(filePath)) {
+    const filePath = path.join(process.cwd(), 'storage', 'uploads', file.path || '', file.filename);
+    if (await fs.stat(filePath)) {
       return {
         stream: fsSync.createReadStream(filePath),
         contentType: file.mimetype,
