@@ -35,6 +35,7 @@ export interface AttachmentModel {
   path: string;
   url: string;
   storageId: number;
+  mimetype: string;
 }
 
 export abstract class StorageType {
@@ -95,6 +96,7 @@ export abstract class StorageType {
       if (await fse.exists(filePath)) {
         return {
           stream: fs.createReadStream(filePath),
+          contentType: file.mimetype,
         };
       }
     }
